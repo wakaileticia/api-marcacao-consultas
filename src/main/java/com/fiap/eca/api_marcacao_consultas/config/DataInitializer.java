@@ -1,11 +1,11 @@
-package com.fiap.ecr.api_marcacao_consultas.config;
+package com.fiap.eca.api_marcacao_consultas.config;
 
-import com.fiap.ecr.api_marcacao_consultas.model.Consulta;
-import com.fiap.ecr.api_marcacao_consultas.model.Especialidade;
-import com.fiap.ecr.api_marcacao_consultas.model.Usuario;
-import com.fiap.ecr.api_marcacao_consultas.repository.ConsultaRepository;
-import com.fiap.ecr.api_marcacao_consultas.repository.EspecialidadeRepository;
-import com.fiap.ecr.api_marcacao_consultas.repository.UsuarioRepository;
+import com.fiap.eca.api_marcacao_consultas.model.Consulta;
+import com.fiap.eca.api_marcacao_consultas.model.Especialidade;
+import com.fiap.eca.api_marcacao_consultas.model.Usuario;
+import com.fiap.eca.api_marcacao_consultas.repository.ConsultaRepository;
+import com.fiap.eca.api_marcacao_consultas.repository.EspecialidadeRepository;
+import com.fiap.eca.api_marcacao_consultas.repository.UsuarioRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
