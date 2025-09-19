@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -21,13 +22,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String token = extractToken(request);
 
+        String path = request.getRequestURI();
+
+        // 🔓 Ignora endpoints públicos (não exige JWT)
+        if (path.startsWith("/api/readings") ||
+            path.startsWith("/api/usuarios") ||
+            path.startsWith("/h2-console")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 🔐 Valida JWT para rotas protegidas
+        String token = extractToken(request);
         if (token != null && jwtTokenProvider.validarToken(token)) {
             String email = jwtTokenProvider.obterEmailDoToken(token);
-
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    email, null, Collections.emptyList());
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
