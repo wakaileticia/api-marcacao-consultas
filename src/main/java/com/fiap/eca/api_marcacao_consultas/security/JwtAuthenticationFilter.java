@@ -7,11 +7,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 import java.util.Collections;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
@@ -23,17 +23,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-
-        // 🔓 Ignora endpoints públicos (não exige JWT)
-        if (path.startsWith("/api/readings") ||
-            path.startsWith("/api/usuarios") ||
-            path.startsWith("/h2-console")) {
+        String path = request.getServletPath();
+        // ⛔ NÃO filtrar os endpoints públicos
+        if (path.equals("/usuarios/login")
+                || path.equals("/usuarios/reset-senhas-teste")
+                || path.startsWith("/h2-console")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 🔐 Valida JWT para rotas protegidas
         String token = extractToken(request);
         if (token != null && jwtTokenProvider.validarToken(token)) {
             String email = jwtTokenProvider.obterEmailDoToken(token);

@@ -37,8 +37,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/medicos")
-    public ResponseEntity<List<Usuario>> listarMedicos(
-            @RequestParam(required = false) String especialidade) {
+    public ResponseEntity<List<Usuario>> listarMedicos(@RequestParam(required = false) String especialidade) {
         List<Usuario> medicos;
         if (especialidade != null && !especialidade.isEmpty()) {
             medicos = usuarioService.buscarMedicosPorEspecialidade(especialidade);
@@ -83,7 +82,7 @@ public class UsuarioController {
         try {
             Usuario usuario = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
             String token = jwtTokenProvider.gerarToken(usuario.getEmail());
-            return ResponseEntity.ok().body(Map.of("token", token));
+            return ResponseEntity.ok(Map.of("token", token, "usuario", usuario.getNome(), "tipo", usuario.getTipo()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
         }
@@ -92,33 +91,15 @@ public class UsuarioController {
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         try {
-            // Remove "Bearer " do header
             String token = authHeader.substring(7);
-
-            // Extrai o email do token
             String email = jwtTokenProvider.obterEmailDoToken(token);
-
-            // Busca o usuário pelo email
             Usuario usuario = usuarioService.buscarPorEmail(email);
-
             return ResponseEntity.ok(usuario);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token inválido");
         }
     }
 
-    // ⚠️ ENDPOINT TEMPORÁRIO APENAS PARA TESTES - REMOVER EM PRODUÇÃO
-    @PostMapping("/reset-senhas-teste")
-    public ResponseEntity<?> resetarSenhasParaTeste() {
-        try {
-            String senhasTeste = usuarioService.resetarSenhasParaTeste();
-            return ResponseEntity.ok().body(Map.of("message", senhasTeste));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
-    // Endpoint para admin alterar senha de qualquer usuário
     @PutMapping("/{id}/senha")
     public ResponseEntity<?> alterarSenhaUsuario(@PathVariable Long id, @RequestBody Map<String, String> request) {
         try {
@@ -128,8 +109,7 @@ public class UsuarioController {
             }
 
             Usuario usuario = usuarioService.alterarSenha(id, novaSenha);
-            return ResponseEntity.ok()
-                    .body(Map.of("message", "Senha alterada com sucesso", "usuario", usuario.getNome()));
+            return ResponseEntity.ok(Map.of("message", "Senha alterada com sucesso", "usuario", usuario.getNome()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
